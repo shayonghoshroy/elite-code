@@ -3,17 +3,20 @@
         <div class="title has-text-centered">
             My Journal
         </div>
-        <div class="field is-grouped mb-5">
-            <p class="control is-expanded">
-                <input class="input" type="text" placeholder="Add a summary">
-            </p>
-            <p class="control">
-                <a class="button is-info">
-                Add
-                </a>
-            </p>
-        </div>
-
+        <form
+            @submit.prevent="addEntry"
+        >
+            <div class="field is-grouped mb-5">
+                <p class="control is-expanded">
+                    <input v-model="newEntryContent" class="input" type="text" placeholder="Add a summary">
+                </p>
+                <p class="control">
+                    <button :disabled="!newEntryContent" class="button is-info">
+                    Add
+                    </button>
+                </p>
+            </div>
+        </form>
         <div 
         v-for="entry in entries"
         class="card mb-2"
@@ -46,17 +49,25 @@ import { ref } from "vue";
 
 // todos
 const entries = ref([
+    /*
     {
         id: 1,
         content: "Two pointer",
         isDone: false
-    },
-    {
-        id: 2,
-        content: "Sliding Window",
-        isDone: false,
-    },
+    }
+    */
 ]);
+
+// add todo
+const newEntryContent = ref("");
+const addEntry = () => {
+    entries.value.push({
+        id: entries.value.length + 1,
+        content: newEntryContent.value,
+        isDone: false,
+    });
+    newEntryContent.value = "";
+};
 </script>
 
 <style>
