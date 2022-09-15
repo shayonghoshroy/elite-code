@@ -31,7 +31,7 @@
                             <button class="button is-light">
                                 &check;
                             </button>
-                            <button class="button is-danger ml-2">
+                            <button @click="deleteEntry(entry.id)" class="button is-danger ml-2">
                                 &cross;
                             </button>
                         </div>
@@ -49,13 +49,11 @@ import { ref } from "vue";
 
 // todos
 const entries = ref([
-    /*
     {
         id: 1,
         content: "Two pointer",
         isDone: false
     }
-    */
 ]);
 
 // add todo
@@ -67,6 +65,11 @@ const addEntry = () => {
         isDone: false,
     });
     newEntryContent.value = "";
+};
+
+// delete todo
+const deleteEntry = (id) => {
+    entries.value = entries.value.filter((entry) => entry.id !== id);
 };
 </script>
 
