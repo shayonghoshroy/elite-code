@@ -6,15 +6,24 @@
         <form
             @submit.prevent="addEntry"
         >
-            <div class="field is-grouped mb-5">
-                <p class="control is-expanded">
-                    <input v-model="newEntryContent" class="input" type="text" placeholder="Add a summary">
-                </p>
-                <p class="control">
-                    <button :disabled="!newEntryContent" class="button is-info">
-                    Add
-                    </button>
-                </p>
+            <div class="columns is-mobile is-vcentered">
+                <div class="column field is-grouped mb-5">
+                    <p class="control is-expanded">
+                        <input v-model="newEntryTitle" class="input" type="text" placeholder="Question">
+                    </p>
+                </div>
+                <div class="column field is-grouped mb-5">
+                    <p class="control is-expanded">
+                        <input v-model="newEntrySolution" class="input" type="text" placeholder="Solution">
+                    </p>
+                </div>
+                <div class="column field is-grouped mb-5">
+                    <p class="control">
+                        <button :disabled="!newEntryTitle || !newEntrySolution" class="button is-info">
+                        Add
+                        </button>
+                    </p>
+                </div>
             </div>
         </form>
         <div 
@@ -29,7 +38,14 @@
                             class="column"
                             :class="{ 'has-text-success line-through' : entry.isDone }"
                         >
-                            {{ entry.content }}
+                            {{ entry.title }}
+                        </div>
+                        <div class="divider is-vertical">|</div>
+                        <div 
+                            class="column"
+                            :class="{ 'has-text-success line-through' : entry.isDone }"
+                        >
+                            {{ entry.solution }}
                         </div>
                         <div class="column is-5 has-text-right">
                             <button 
@@ -52,42 +68,61 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { getAuth } from "firebase/auth";
+import { collection, getDocs, onSnapshot, query, where, deleteDoc, addDoc, doc, updateDoc } from "firebase/firestore";
+import { db } from '@/firebase';
 
-// todos
+
+// entries
 const entries = ref([
-    {
-        id: 1,
-        content: "Two pointer",
-        isDone: true
-    },
-    {
-        id: 2,
-        content: "Sliding Window",
-        isDone: false
-    }
 ]);
+const entriesCollection = collection(db, "entries");
+const uid = getAuth().currentUser.uid;
 
-// add todo
-const newEntryContent = ref("");
-const addEntry = () => {
-    entries.value.push({
-        id: entries.value.length + 1,
-        content: newEntryContent.value,
-        isDone: false,
+onMounted(async () => {
+    // get the users uid
+    //const uid = getAuth().currentUser.uid;
+
+    onSnapshot(query(entriesCollection, where("uid", "==", uid)), (querySnapshot) => {
+        // populate the entires table
+        entries.value = querySnapshot.docs.map((doc) => {
+            return {
+                id: doc.id,
+                ...doc.data(),
+            };
+        });
     });
-    newEntryContent.value = "";
+    
+});
+
+// add entry
+const newEntryTitle = ref("");
+const newEntrySolution = ref("");
+const addEntry = () => {
+    // Add a new document with a generated id.
+    const docRef = addDoc(entriesCollection, {
+        title: newEntryTitle.value,
+        solution: newEntrySolution.value,
+        isDone: false,
+        uid: uid,
+    });
+    newEntryTitle.value = "";
+    newEntrySolution.value = "";
 };
 
 //toggle the isDone property
 const toggleIsDone = (id) => {
     const entry = entries.value.find((entry) => entry.id === id);
-    entry.isDone = !entry.isDone;
+    updateDoc(doc(entriesCollection, id), {
+        isDone: !entry.isDone
+    });
 };
 
-// delete todo
+// delete entry
 const deleteEntry = (id) => {
-    entries.value = entries.value.filter((entry) => entry.id !== id);
+    // delete entry from firebase database
+    deleteDoc(doc(entriesCollection, id));
 };
 </script>
 

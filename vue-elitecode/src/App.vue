@@ -13,6 +13,7 @@
   import { onMounted, ref } from "vue";
   import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";  // firebase auth hook that changes on state change
   import router from "./router";
+  import { db } from '@/firebase';
 
   const isLoggedIn = ref(false);
 
@@ -31,8 +32,9 @@
         console.log("User is signed out");
         isLoggedIn.value = false;
       }
-    });
+    }); 
   });
+
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -47,4 +49,5 @@
 
 <style>
   @import 'bulma/css/bulma.css';
+  @import '@creativebulma/bulma-divider';
 </style>
