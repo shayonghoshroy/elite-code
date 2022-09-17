@@ -7,17 +7,17 @@
             @submit.prevent="addEntry"
         >
             <div class="columns is-mobile is-vcentered">
-                <div class="column field is-grouped mb-5">
+                <div class="column field is-one-quarter is-grouped mb-5">
                     <p class="control is-expanded">
                         <input v-model="newEntryTitle" class="input" type="text" placeholder="Question">
                     </p>
                 </div>
-                <div class="column field is-grouped mb-5">
+                <div class="column field is-two-thirds is-grouped mb-5">
                     <p class="control is-expanded">
                         <input v-model="newEntrySolution" class="input" type="text" placeholder="Solution">
                     </p>
                 </div>
-                <div class="column field is-grouped mb-5">
+                <div class="column field is-one-fifth is-grouped mb-5">
                     <p class="control">
                         <button :disabled="!newEntryTitle || !newEntrySolution" class="button is-info">
                         Add
@@ -26,6 +26,10 @@
                 </div>
             </div>
         </form>
+
+        <div>
+            <button class="button is-fullwidth is-success is-focused mb-2" data-target="modal-js-example" @click="showModal">Learn</button>
+        </div>
         <div 
         v-for="entry in entries"
         class="card mb-2"
@@ -35,14 +39,14 @@
                 <div class="content">
                     <div class="columns is-mobile is-vcentered">
                         <div 
-                            class="column"
+                            class="column is-one-fifth"
                             :class="{ 'has-text-success line-through' : entry.isDone }"
                         >
                             {{ entry.title }}
                         </div>
                         <div class="divider is-vertical">|</div>
                         <div 
-                            class="column"
+                            class="column is-one-third"
                             :class="{ 'has-text-success line-through' : entry.isDone }"
                         >
                             {{ entry.solution }}
@@ -59,10 +63,26 @@
                             </button>
                         </div>
                     </div>
-                
-                    
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- flashcard modal -->
+    <div class="modal" :class="{'is-active': showModalFlag}">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+            <p class="modal-card-title">Confirmation Modal</p>
+            <button class="delete" aria-label="close" @click="cancelModal">></button>
+            </header>
+            <section class="modal-card-body">
+            <p>{{ message }}</p>
+            </section>
+            <footer class="modal-card-foot">
+            <button class="button is-success" @click="okModal">Ok</button>
+            <button class="button" @click="cancelModal">Cancel</button>
+            </footer>
         </div>
     </div>
 </template>
@@ -124,6 +144,34 @@ const deleteEntry = (id) => {
     // delete entry from firebase database
     deleteDoc(doc(entriesCollection, id));
 };
+</script>
+
+
+<script>
+    export default {
+        data () {
+            return {
+                showModalFlag: false,
+                okPressed: false,
+                message: "Press 'Ok' or 'Cancel'.",
+            }
+        },
+        methods: {
+            showModal() {
+                this.okPressed = false;
+                this.showModalFlag = true;
+            },
+            okModal() {
+                this.okPressed = true;
+                this.showModalFlag = false;
+            },
+            cancelModal() {
+                this.okPressed = false;
+                this.showModalFlag = false;
+            }
+        }    
+    
+    }
 </script>
 
 <style>

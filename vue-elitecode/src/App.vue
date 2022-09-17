@@ -14,6 +14,7 @@
   import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";  // firebase auth hook that changes on state change
   import router from "./router";
   import { db } from '@/firebase';
+  
 
   const isLoggedIn = ref(false);
 
