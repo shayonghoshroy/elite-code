@@ -73,14 +73,22 @@
         <div class="modal-background"></div>
         <div class="modal-card">
             <header class="modal-card-head">
-            <p class="modal-card-title">Confirmation Modal</p>
+            
             <button class="delete" aria-label="close" @click="cancelModal">></button>
             </header>
             <section class="modal-card-body">
-            <p>{{ message }}</p>
+            <div class="content">
+                <div v-show="!getFlippedStatus()" ref="flashCardTitle" :key="flashCardTitle">
+                    <h1 ref="flashcardTitle">{{ getFlashcardTitle() }}</h1>
+                </div>
+                <div v-show="getFlippedStatus()" ref="flashCardTitle" :key="flashCardTitle">
+                    <h1>{{ getFlashcardSolution() }}</h1>
+                </div>
+            </div>
             </section>
             <footer class="modal-card-foot">
-            <button class="button is-success" @click="okModal">Ok</button>
+            <button class="button is-success" @click="getRandomEntry()">Ok</button>
+            <button class="button is-success" @click="toggleFlippedStatus()">Flip</button>
             <button class="button" @click="cancelModal">Cancel</button>
             </footer>
         </div>
@@ -100,6 +108,7 @@ const entries = ref([
 const entriesCollection = collection(db, "entries");
 const uid = getAuth().currentUser.uid;
 
+
 onMounted(async () => {
     // get the users uid
     //const uid = getAuth().currentUser.uid;
@@ -112,7 +121,10 @@ onMounted(async () => {
                 ...doc.data(),
             };
         });
+        getRandomEntry();
     });
+
+    
     
 });
 
@@ -144,34 +156,99 @@ const deleteEntry = (id) => {
     // delete entry from firebase database
     deleteDoc(doc(entriesCollection, id));
 };
+
+var flashcardTitle = ref("");
+var flashcardSolution = ref("");
+var flashcardIsFlipped = ref(false);
+// get random entry from collection of entries
+const getRandomEntry = (status) => {
+    console.log('hi');
+    // get list of document ids from firebase database
+    const docIds = entries.value.map((entry) => entry.id);
+    // get random document id
+    const randomIndex = Math.floor(Math.random() * entries.value.length);
+    const randomDocId = docIds[randomIndex];
+    // get random document from firebase  collection
+    const randomDoc = entries.value.find((entry) => entry.id === randomDocId);
+    console.log(randomDoc);
+    // return random document
+    const target_copy = Object.assign({}, randomDoc);
+    
+    //console.log(target_copy);
+    /*
+    console.log(flashcardIsFlipped.value)
+    if (flashcardIsFlipped.value) {
+        console.log(target_copy.solution);
+        flashcardIsFlipped.value = !flashcardIsFlipped.value;
+        console.log(flashcardIsFlipped.value)
+        return target_copy.solution;
+    } else {
+        console.log(target_copy.title);
+        flashcardIsFlipped.value = !flashcardIsFlipped.value;
+        console.log(flashcardIsFlipped.value)
+        return target_copy.title;
+    }*/
+
+    flashcardTitle = target_copy.title;
+    flashcardSolution = target_copy.solution;
+    console.log(flashcardTitle);
+    console.log(flashcardSolution);
+};
+
+const getFlippedStatus = () => {
+    return flashcardIsFlipped.value;
+};
+
+const toggleFlippedStatus = () => {
+    flashcardIsFlipped.value = !flashcardIsFlipped.value;
+};
+
+const getFlashcardTitle = () => {
+    return flashcardTitle;
+};
+
+const getFlashcardSolution = () => {
+    return flashcardSolution;
+};
+
 </script>
 
 
 <script>
-    export default {
-        data () {
-            return {
-                showModalFlag: false,
-                okPressed: false,
-                message: "Press 'Ok' or 'Cancel'.",
-            }
+export default {
+    data () {
+        return {
+            showModalFlag: false,
+            okPressed: false,
+            message: "Press 'Ok' or 'Cancel'.",
+            flashcardIsFlipped: false,
+            entry: ""
+        }
+    },
+    methods: {
+        showModal() {
+            this.okPressed = false;
+            this.showModalFlag = true;
         },
-        methods: {
-            showModal() {
-                this.okPressed = false;
-                this.showModalFlag = true;
-            },
-            okModal() {
-                this.okPressed = true;
-                this.showModalFlag = false;
-            },
-            cancelModal() {
-                this.okPressed = false;
-                this.showModalFlag = false;
-            }
-        }    
-    
-    }
+        
+        okModal() {
+            setRandomEntry();
+            this.okPressed = true;
+            this.showModalFlag = false;
+        },
+        cancelModal() {
+            this.okPressed = false;
+            this.showModalFlag = false;
+        },
+        
+        flipFlashcard() {
+            this.flashcardIsFlipped = !this.flashcardIsFlipped;
+        },
+        getEntry() {
+            return this.entry;
+        },
+    }    
+}
 </script>
 
 <style>
@@ -181,5 +258,15 @@ const deleteEntry = (id) => {
     }
     .line-through {
         text-decoration: line-through;
+    }
+    .modal-card-body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 400px;
+    }
+    .modal-card-foot {
+        /* move buttons to center */
+        justify-content: center;
     }
 </style>
