@@ -28,7 +28,7 @@
         </form>
 
         <div>
-            <button class="button is-fullwidth is-success is-focused mb-2" data-target="modal-js-example" @click="showModal">Learn</button>
+            <button class="button is-fullwidth is-success is-focused mb-2" data-target="modal-js-example" @click="showModal()">Learn</button>
         </div>
         <div 
         v-for="entry in entries"
@@ -78,25 +78,24 @@
             </header>
             <section class="modal-card-body">
             <div class="content">
-                <div v-show="!getFlippedStatus()" ref="flashCardTitle" :key="flashCardTitle">
-                    <h1 ref="flashcardTitle">{{ getFlashcardTitle() }}</h1>
+                <div v-show="!getFlippedStatus()">
+                    <h1>{{ getFlashcardTitle() }}</h1>
                 </div>
-                <div v-show="getFlippedStatus()" ref="flashCardTitle" :key="flashCardTitle">
+                <div v-show="getFlippedStatus()">
                     <h1>{{ getFlashcardSolution() }}</h1>
                 </div>
             </div>
             </section>
             <footer class="modal-card-foot">
-            <button class="button is-success" @click="getRandomEntry()">Ok</button>
-            <button class="button is-success" @click="toggleFlippedStatus()">Flip</button>
-            <button class="button" @click="cancelModal">Cancel</button>
+            <button class="button flashcard-foot is-fullwidth is-focused is-success" v-show="getFlippedStatus()" @click="getRandomEntry()">Next</button>
+            <button class="button flashcard-foot is-fullwidth is-focused is-success" v-show="!getFlippedStatus()" @click="toggleFlippedStatus()">Solution</button>
             </footer>
         </div>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, onSnapshot, query, where, deleteDoc, addDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from '@/firebase';
@@ -159,7 +158,7 @@ const deleteEntry = (id) => {
 
 var flashcardTitle = ref("");
 var flashcardSolution = ref("");
-var flashcardIsFlipped = ref(false);
+var flashcardIsFlipped = ref(true);
 // get random entry from collection of entries
 const getRandomEntry = (status) => {
     console.log('hi');
@@ -191,6 +190,7 @@ const getRandomEntry = (status) => {
 
     flashcardTitle = target_copy.title;
     flashcardSolution = target_copy.solution;
+    flashcardIsFlipped.value = !flashcardIsFlipped.value;
     console.log(flashcardTitle);
     console.log(flashcardSolution);
 };
@@ -199,8 +199,11 @@ const getFlippedStatus = () => {
     return flashcardIsFlipped.value;
 };
 
+var updates = ref(0)
+
 const toggleFlippedStatus = () => {
     flashcardIsFlipped.value = !flashcardIsFlipped.value;
+    updates += 1
 };
 
 const getFlashcardTitle = () => {
@@ -211,8 +214,10 @@ const getFlashcardSolution = () => {
     return flashcardSolution;
 };
 
-</script>
 
+
+
+</script>
 
 <script>
 export default {
@@ -222,7 +227,7 @@ export default {
             okPressed: false,
             message: "Press 'Ok' or 'Cancel'.",
             flashcardIsFlipped: false,
-            entry: ""
+            entry: "",
         }
     },
     methods: {
@@ -246,7 +251,7 @@ export default {
         },
         getEntry() {
             return this.entry;
-        },
+        }
     }    
 }
 </script>
@@ -266,7 +271,22 @@ export default {
         height: 400px;
     }
     .modal-card-foot {
-        /* move buttons to center */
+        display: flex;
+        align-items: center;
         justify-content: center;
+    }
+    .flashcard-foot {
+        /* constant size */
+        width: 100px;
+        height: 50px;
+        font-size: 20px;
+    }
+    .delete {
+        /* make button red */
+        background-color: red;
+        
+    }
+    .delete:hover {
+        background-color:red;
     }
 </style>
