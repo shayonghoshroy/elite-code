@@ -14,6 +14,9 @@ const router = createRouter({
             meta: { requiresAuth: true }
         },
         { path: '/problem', component: () => import('../views/Problem.vue') },
+        // problem routes
+        { path: '/problem/:id', component: () => import('../views/Problem.vue') },
+        
     ],
 });
 
