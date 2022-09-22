@@ -13,7 +13,6 @@ const router = createRouter({
             component: () => import('../views/Journal.vue'),
             meta: { requiresAuth: true }
         },
-        { path: '/problem', component: () => import('../views/Problem.vue') },
         // problem routes
         { path: '/problem/:id', component: () => import('../views/Problem.vue') },
         

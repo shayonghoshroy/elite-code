@@ -39,11 +39,36 @@
         {{result}}
     </div>
 
+    <!-- save to jourmal modal -->
+    <div class="modal" :class="{'is-active': showModalFlag}">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <button class="delete" aria-label="close" @click="cancelModal">></button>
+                <h1 class="title modal-card-head-title">CORRECT!</h1>
+            </header>
+            <section class="modal-card-body">
+            <div class="content">
+                <p class="control has-text-centered">
+                    Summarize your solution.
+                </p>
+                <p class="control is-expanded">
+                    <input v-model="newEntrySolution" class="input" type="text" placeholder="Created a hashmap...">
+                </p>
+            </div>
+            </section>
+            <footer class="modal-card-foot">
+            <button class="button flashcard-foot is-fullwidth is-focused is-success" @click="submitEntry()">Submit</button>
+            </footer>
+        </div>
+    </div>
+
 </template>
 
 <script>
 import { ref } from "vue";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { db } from '@/firebase';
 import { VAceEditor } from 'vue3-ace-editor';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -57,9 +82,13 @@ export default {
         return {
             script: "",
             result: "",
-            collection: collection(db, "problems"),
+            problemCollection: collection(db, "problems"),
+            entryCollection: collection(db, "entries"),
             problem_id: this.$route.params.id,
             problem: null,
+            showModalFlag: false,
+            okPressed: false,
+            newEntrySolution: "",
         }
     },
     beforeMount: function () {
@@ -85,8 +114,8 @@ export default {
                     }
                 }
                 this.result = "Correct!";
-                // check if function returns a value
-
+                // modal to save to users journal
+                this.showModalFlag = true;
             } catch (error) {
                 this.result = error; 
             }
@@ -95,7 +124,7 @@ export default {
         },
         async setProblem() {
             // get problem from firebase collection
-            const docRef = doc(this.collection, this.problem_id);
+            const docRef = doc(this.problemCollection, this.problem_id);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -106,10 +135,101 @@ export default {
                 console.log("No such document!");
             }
             
-        }
+        },
+        async submitEntry() {
+            // save to users journal
+            console.log("submitting entry...", this.newEntrySolution);
+            // check if doc exists
+            const q = query(this.entryCollection, where("title", "==", this.problem.title));
+
+            var docId = "";
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+                // doc.data() is never undefined for query doc snapshots
+                console.log(doc.id, " => ", doc.data());
+                docId = doc.id
+            });
+
+            if (querySnapshot.empty) {
+                console.log('no exists!')
+                // Add a new document with a generated id.
+                addDoc(this.entryCollection, {
+                    title: this.problem.title,
+                    solution: this.newEntrySolution,
+                    isDone: false,
+                    uid: getAuth().currentUser.uid,
+                });
+            } else {
+                console.log("exists");
+                // update document
+                updateDoc(doc(this.entryCollection, docId), {
+                    solution: this.newEntrySolution
+                });
+            }
+            
+            this.newEntrySolution = "";
+            // force user to Journal page
+            this.$router.push('/journal');
+        },
+        showModal() {
+            this.okPressed = false;
+            this.showModalFlag = true;
+        },
+        
+        okModal() {
+            setRandomEntry();
+            this.okPressed = true;
+            this.showModalFlag = false;
+        },
+        cancelModal() {
+            this.okPressed = false;
+            this.showModalFlag = false;
+        },
     },
 }    
 </script>
 
 <style>
+    .modal-card-head-title {
+        margin-left: auto;
+        margin-right: auto;
+        animation: color-change 5s infinite;
+    }
+    @keyframes color-change {
+        0% {
+    color: blue;
+        }
+        10% {
+            color: #8e44ad;
+        }
+        20% {
+            color: #1abc9c;
+        }
+        30% {
+            color: #d35400;
+        }
+        40% {
+            color: blue;
+        }
+        50% {
+            color: #34495e;
+        }
+        60% {
+            color: blue;
+        }
+        70% {
+            color: #2980b9;
+        }
+        80% {
+            color: #f1c40f;
+        }
+        90% {
+            color: #2980b9;
+        }
+        100% {
+            color: pink;
+        }
+                
+    }
+   
 </style>
