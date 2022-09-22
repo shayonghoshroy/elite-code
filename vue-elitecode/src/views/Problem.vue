@@ -98,10 +98,8 @@ export default {
         runScript() {
             // run user code, return any errors
             // by creating a new function instead of using eval(), all variables are locally scoped and its safer
-            try {
-                //this.result = new Function (this.script)(); 
-                var args = 's'
-                var F = new Function (args, this.script);
+            try { 
+                var F = new Function (this.problem.args, this.script);
                 // loop thru all testcases in problem
                 for (const [key, value] of Object.entries(this.problem.testcases)) {
                     // run user code on each testcase
