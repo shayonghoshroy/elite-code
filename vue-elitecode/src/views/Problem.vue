@@ -39,7 +39,7 @@
         {{result}}
     </div>
 
-    <!-- save to jourmal modal -->
+    <!-- save to journal modal -->
     <div class="modal" :class="{'is-active': showModalFlag}">
         <div class="modal-background"></div>
         <div class="modal-card">
