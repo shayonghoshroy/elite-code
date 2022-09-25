@@ -1,4 +1,39 @@
 <template>
+    <!-- flexbox with two rows each taking up half of the box -->
+    <div class="columns">
+        <div class="column is-one-third">
+            <div class="has-text-left">
+                <h1 class="title mt-5 mb-2">{{ problem.title }}</h1>
+                <p class="content">{{ problem.description }}</p>
+                <h3 class="title mt-5 mb-2">Examples</h3>
+                <div v-for="example in problem.examples" :key="example.id">
+                    <li>{{ example }}</li>
+                </div>
+                <h3 class="title mt-5">Constraints</h3>
+                <div v-for="constraint in problem.constraints" :key="constraint.id">
+                    <li>{{ constraint }}</li>
+                </div>
+                <!-- add some blank space -->
+                <div class="mt-5"></div>
+            </div>
+        </div>
+        <div class="column is-two-thirds">
+            <v-ace-editor
+                v-model:value="script"
+                @init="editorInit"
+                lang="javascript"
+                theme="dracula"
+                style="height: 800px" />
+
+            <form @submit.prevent="runScript"> 
+                <p class="control">
+                    <button :disabled="!script" class="button is-success submit-button">
+                    Submit
+                    </button>
+                </p>
+            </form>
+        </div>
+    </div>
     <!--
         <iframe
         src="https://codesandbox.io/embed/new?codemirror=1&highlights=6,7,8,9"
@@ -7,33 +42,8 @@
         sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
         ></iframe>
     -->
-    <div class="content has-text-left">
-        <h1>{{ problem.title }}</h1>
-        <p>{{ problem.description }}</p>
-        <h3>Examples</h3>
-        <div v-for="example in problem.examples" :key="example.id">
-            <p>{{ example }}</p>
-        </div>
-        <h3>Constraints</h3>
-        <div v-for="constraint in problem.constraints" :key="constraint.id">
-            <p>{{ constraint }}</p>
-        </div>
-    </div>
-    <v-ace-editor
-    v-model:value="script"
-    @init="editorInit"
-    lang="javascript"
-    theme="dracula"
-    style="height: 400px" />
-
-    <form @submit.prevent="runScript"> 
-        <p class="control">
-            <button :disabled="!script" class="button is-info">
-            Submit
-            </button>
-        </p>
-               
-    </form>
+    
+    
 
     <div class="title has-text-centered">
         {{result}}
@@ -226,8 +236,23 @@ export default {
         }
         100% {
             color: pink;
-        }
-                
+        }      
     }
-   
+
+    .flex-container {
+        display: flex;
+        flex-direction: row;
+    }
+    .submit-button {
+        /* wider */
+        width: 100%;
+    }
+
+    body {
+        /* push footer to bottom */
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        
+    }
 </style>

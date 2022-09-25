@@ -1,9 +1,27 @@
 <template>
-    <h1>Create an Account</h1>
-    <p><input type="text" placeholder="Email" v-model="email" /></p>
-    <p><input type="password" placeholder="Password" v-model="password" /></p>
-    <p><button @click="register">Submit</button></p>
-    <p><button @click="signInWithGoogle">Sign In With Google</button></p>
+    
+    <div class="flexbox mt-5">
+        <div class="flexbox-item">
+            <div class="flexbox-item-content">
+                <h1 class="title main-title">Create an Account</h1>
+                <p class="control mb-2">
+                    <input v-model="email" class="input" type="text" placeholder="Email">
+                </p>
+                <p class="control mb-2">
+                    <input v-model="password" class="input" type="password" placeholder="Password">
+                </p>
+                <p class="control">
+                    <button class="button is-success" @click="register">Submit</button>
+                </p>
+                <!-- line -->
+                <div class="divider">or you can</div>
+                <p class="control mb-5">
+                    <button class="button is-info" @click="signInWithGoogle">Sign In With Google</button>
+                </p>
+                
+            </div>
+        </div>
+    </div>
 
     <!-- create user schedule modal -->
     <div class="modal" :class="{'is-active': showModalFlag}">
@@ -43,7 +61,6 @@
                     <label class="label">You are required to complete exactly  <h3 class="title in-line">{{questionsPerWeek}}</h3> questions per week.</label>
                     <label class="label">Let's make a schedule that fits around your life.</label>
                     <label class="label">How many questions do you want to solve on each day of the week?</label>
-                    <label class="label">Enter numbers only.</label>
                     <input v-model="monday" class="input mb-1" type="text" placeholder="Monday">
                     <input v-model="tuesday" class="input mb-1" type="text" placeholder="Tuesday">
                     <input v-model="wednesday" class="input mb-1" type="text" placeholder="Wednesday">
@@ -376,4 +393,33 @@
     .result {
         color: #00d1b2;
     }
+    .flexbox-item-content {
+        /* flexbox item content */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .control {
+        /* wider */
+        width: 30%;
+    }
+    .button {
+        /* wider */
+        width: 100%;
+    }
+
+    body {
+        height: 100vh;
+    }
+    .title {
+        color: black;
+    }
+    .main-title {
+        /* white */
+        color: white;
+    }
+
+    
 </style>

@@ -1,6 +1,6 @@
 <template>
     <div class="journal">
-        <div class="title has-text-centered">
+        <div class="title mt-5 has-text-centered">
             My Journal
         </div>
         <form
@@ -289,4 +289,7 @@ export default {
     .delete:hover {
         background-color:red;
     }
+    body {  
+            height: 100vh;
+    } 
 </style>

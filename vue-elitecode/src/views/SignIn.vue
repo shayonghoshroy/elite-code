@@ -1,10 +1,27 @@
 <template>
-    <h1>Sign In</h1>
-    <p><input type="text" placeholder="Email" v-model="email" /></p>
-    <p><input type="password" placeholder="Password" v-model="password" /></p>
-    <p v-if="errMsg">{{ errMsg }}</p>
-    <p><button @click="register">Submit</button></p>
-    <p><button @click="signInWithGoogle">Sign In With Google</button></p>
+    <div class="flexbox mt-5">
+        <div class="flexbox-item">
+            <div class="flexbox-item-content">
+                <h1 class="title">Sign In</h1>
+                <p class="control mb-2">
+                    <input v-model="email" class="input" type="text" placeholder="Email">
+                </p>
+                <p class="control mb-2">
+                    <input v-model="password" class="input" type="password" placeholder="Password">
+                </p>
+                <p v-if="errMsg">{{ errMsg }}</p>
+                <p class="control">
+                    <button class="button is-success" @click="register">Submit</button>
+                </p>
+                <!-- line -->
+                <div class="divider">or you can</div>
+                <p class="control mb-5">
+                    <button class="button is-info" @click="signInWithGoogle">Sign In With Google</button>
+                </p>
+                
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -70,3 +87,25 @@ const signInWithGoogle = () => {
 };
 
 </script>
+
+<style>
+    .flexbox-item-content {
+        /* flexbox item content */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .control {
+        /* wider */
+        width: 30%;
+    }
+    .button {
+        /* wider */
+        width: 100%;
+    }
+    body {
+        height: 100vh;
+    }
+</style>
