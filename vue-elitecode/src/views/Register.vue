@@ -32,7 +32,7 @@
                             </select>
                         </div>
                     </div>
-                    <label class="label">Time Frame</label>
+                    <label class="label">How long should this take? A shorter time frame means a higher workload.</label>
                     <div class="select">
                         <select v-model="timeframe">
                             <option value="short">{{shortSchedule}} weeks</option>
@@ -40,7 +40,7 @@
                         </select>
                     </div>
 
-                    <label class="label">You are required to complete exactly {{questionsPerWeek}} questions per week.</label>
+                    <label class="label">You are required to complete exactly  <h3 class="title in-line">{{questionsPerWeek}}</h3> questions per week.</label>
                     <label class="label">Let's make a schedule that fits around your life.</label>
                     <label class="label">How many questions do you want to solve on each day of the week?</label>
                     <label class="label">Enter numbers only.</label>
@@ -60,7 +60,7 @@
                 </div>
             </section>
             <footer class="modal-card-foot">
-            <button v-if="scheduledSum == questionsPerWeek && scheduledSum != 0" class="button flashcard-foot is-fullwidth is-focused is-success" @click="submitSchedule()">Submit</button>
+            <button v-if="scheduledSum == questionsPerWeek && scheduledSum != 0" class="button flashcard-foot is-fullwidth is-focused is-success" @click="submitSchedule(questionsPerWeek, shortSchedule, longSchedule)">Submit</button>
             </footer>
         </div>
     </div>
@@ -69,6 +69,8 @@
 <script>
     import { ref } from "vue";
     import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+    import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+    import { db } from '@/firebase';
     
     export default {
         data () {
@@ -91,6 +93,8 @@
                 friday: null,
                 saturday: null,
                 sunday: null,
+                requiredConcepts: ["String", "Array", "Graphs", "Linked Lists", "Sorting Algorithms", "Tree"],
+                extraConcepts: ["Number Theory", "Bit Manipulation", "Dynamic Programming"]
             }
         },
         computed: {
@@ -132,23 +136,23 @@
                     if (this.concepts == "common") {
                         return 10;
                     } else {
-                        return 13;
+                        return 15;
                     }
                 }
             },
             questionsPerWeek() {
-                if (this.level != "Senior") {
+                if (this.level == "Senior" && this.concepts == "all") {
                     if (this.timeframe == "short") {
-                        return 18
+                        return 15
                     } else if (this.timeframe == "long") {
                         return 9
                     }
                 } else {
                     if (this.timeframe == "short") {
-                        return 13;
+                        return 18
                     } else if (this.timeframe == "long") {
-                        return 9;
-                    } 
+                        return 9
+                    }
                 }
                 return 0;
             },
@@ -204,11 +208,6 @@
                 // push users to the home page
                 //this.$router.push('/');
             },
-            submitSchedule() {
-                this.okModal();
-                // push users to the home page
-                this.$router.push('/');
-            },
             showModal() {
                 this.okPressed = false;
                 this.showModalFlag = true;
@@ -221,6 +220,144 @@
             cancelModal() {
                 this.okPressed = false;
                 this.showModalFlag = false;
+            },
+            completeResgistration() {
+                // close modal, push users to the home page
+                this.okModal();
+                this.$router.push('/');
+            },
+            submitSchedule(questionsPerWeek, shortSchedule, longSchedule) {
+                // create schedule
+                // create a dictionary of the week where the key is the day if it is not null and the value is the number of questions for that day
+                let weeklySchedule = {};
+                if (this.monday) {
+                    weeklySchedule["Monday"] = this.monday;
+                }
+                if (this.tuesday) {
+                    weeklySchedule["Tuesday"] = this.tuesday;
+                }
+                if (this.wednesday) {
+                    weeklySchedule["Wednesday"] = this.wednesday;
+                }
+                if (this.thursday) {
+                    weeklySchedule["Thursday"] = this.thursday;
+                }
+                if (this.friday) {
+                    weeklySchedule["Friday"] = this.friday;
+                }
+                if (this.saturday) {
+                    weeklySchedule["Saturday"] = this.saturday;
+                }
+                if (this.sunday) {
+                    weeklySchedule["Sunday"] = this.sunday;
+                }
+                
+                // create user's schedule
+
+                // total number of weeks in schedule
+                var weeks = 0;
+                if (this.timeframe == shortSchedule) {
+                    weeks = shortSchedule
+                } else {
+                    weeks = longSchedule
+                }
+                
+                // counters
+                var conceptCounter = 0
+                var conceptIndex = 0
+                // keep track of current difficulty level
+                var difficulty = 'easy'
+                var repeats = 0
+
+                var currentSchedule = {}
+                var dayIndex = 0
+                for (const [key, value] of Object.entries(weeklySchedule)) {
+                    currentSchedule[key] = 0
+                }
+                //console.log(currentSchedule)
+                //console.log(Object.keys(currentSchedule)[0])
+                var dayIndex = 0
+                var day = Object.keys(currentSchedule)[dayIndex]
+
+                if (this.concepts == "all") {
+                    this.requiredConcepts.push.apply(this.requiredConcepts, this.extraConcepts)
+                }
+
+                //console.log("DIFFICULTY LEVEL:", difficulty)
+                //console.log('\n')
+                
+                var scheduleArray = [] // final user schedule, an array of dicts
+                for(let i = 1; i <= weeks; i++) {
+                    //console.log('week',i)
+                    //console.log(questionsPerWeek)
+                    var weekDict = {} // dictionary for each week
+                    for(let j = 1; j <= questionsPerWeek; j++) {
+                        if (conceptCounter == 3) {
+                            conceptIndex += 1
+                            conceptCounter = 0
+                        } 
+                        if (conceptIndex >= this.requiredConcepts.length){
+                            conceptIndex = 0
+                            repeats += 1
+                            if (repeats == 2) {
+                                difficulty = "medium"
+                                //console.log("DIFFICULTY LEVEL:", difficulty)
+                            }
+                            if (repeats == 4) {
+                                difficulty = "hard"
+                                //console.log("DIFFICULTY LEVEL:", difficulty)
+                            }
+                        }
+                        if (currentSchedule[day] == weeklySchedule[day]) {
+                            dayIndex += 1
+                            day = Object.keys(currentSchedule)[dayIndex]
+                        }
+                        
+                        // add the concept and its difficulty to week dict
+                        var newConceptDict = {};
+                        newConceptDict[this.requiredConcepts[conceptIndex]] = difficulty;
+                        // if weekDict[day] is undefined, set it to the new array otherwise push the array
+                        if (weekDict[day] == undefined) {
+                            weekDict[day] = []
+                        }
+                        weekDict[day].push(newConceptDict)
+
+                        conceptCounter += 1
+                        currentSchedule[day] += 1
+                    }
+                    scheduleArray.push(weekDict) // push the week into the schedule
+
+                    // reset currentSchedule after each week
+                    //console.log(currentSchedule)
+                    dayIndex = 0
+                    var day = Object.keys(currentSchedule)[dayIndex]
+                    for (const [key, value] of Object.entries(weeklySchedule)) {
+                        currentSchedule[key] = 0
+                    }
+                    
+                    //console.log('\n')
+                    
+                }
+                for (const [key, value] of Object.entries(scheduleArray)) {
+                    console.log(key, value)
+                }
+
+                console.log(getAuth().currentUser.uid)
+                // add schedule to firebase database where the id of the document is the current users uid
+                var scheduleCollection = collection(db, "schedules");
+                setDoc(doc(scheduleCollection, getAuth().currentUser.uid), {
+                    schedule: scheduleArray
+                });
+                /*
+                // Add a new document with a generated id.
+                const docRef = setDoc(scheduleCollection, {
+                    schedule: scheduleArray,
+                    uid: getAuth().currentUser.uid
+                });
+                */
+
+                this.completeResgistration();
+                
             },
         },
     }    
@@ -240,4 +377,3 @@
         color: #00d1b2;
     }
 </style>
-

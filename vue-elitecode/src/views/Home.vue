@@ -1,8 +1,20 @@
 <template>
 <h1 class="title has-text-centered">Home</h1>
 <!-- for loop to run thru problems and get a router link to it -->
+<h3 class="title mb-1">Problems</h3>
 <div v-for="problem in problems">
     <router-link v-bind:to="'/problem/'+problem.id">{{problem.title}}</router-link>
+</div>
+
+<div class="mt-5" v-for="(week, index) in schedule" :key="week.name">
+    <h3 class="title mb-2">Week {{index + 1}}</h3>
+    <div v-for="(key, value) in week" :key="key.name">
+        <p class="mt-4">{{value}}</p>
+        <!-- bullet list -->
+        <div v-for="problem in key" :key="problem.name">
+            <li class="content ml-4">{{Object.keys(problem)[0]}}: {{Object.values(problem)[0]}} </li>
+        </div>
+    </div>
 </div>
 
 
@@ -12,18 +24,21 @@
 <script>
     import { ref } from "vue";
     import { db } from '@/firebase';
-    import { collection, getDocs } from "firebase/firestore";
+    import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
     import { getAuth } from "firebase/auth";
     
     export default {
         data () {
             return {
                 problemsCollection: collection(db, "problems"),
-                problems: []
+                scheduleCollection: collection(db, "schedules"),
+                problems: [],
+                schedule: null
             }
         },
         beforeMount: function () {
             this.setProblems();
+            this.setSchedule();
         },
         methods: {
             setProblems() {
@@ -39,6 +54,21 @@
                     });
                 });
             },
+            async setSchedule() {
+                // get the schedule doc from the schedules collection that has the same uid field as the current user
+                
+                const docRef = doc(this.scheduleCollection, getAuth().currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                
+                console.log(getAuth().currentUser.uid);
+                if (docSnap) {
+                    const target_copy = Object.assign({}, docSnap.data());
+                    this.schedule = target_copy.schedule;
+                } else {
+                    //doc.data() will be undefined in this case
+                    console.log("No such document!");
+                } 
+            }
         },
     }    
     </script>
