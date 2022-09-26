@@ -2,7 +2,7 @@
   <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item" href="/">
-        <img class="mr-1" src="src/assets/images/logo.png" width="28" height="28"> ELITECODE
+        <img class="mr-1" src="/logo.png" width="28" height="28"> ELITECODE
       </a>
       <!-- add a span veritcal line -->
       
