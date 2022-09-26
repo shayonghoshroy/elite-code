@@ -149,7 +149,8 @@ export default {
             // save to users journal
             console.log("submitting entry...", this.newEntrySolution);
             // check if doc exists
-            const q = query(this.entryCollection, where("title", "==", this.problem.title));
+            const q = query(this.entryCollection, where("title", "==", this.problem.title), where("uid", "==", getAuth().currentUser.uid));
+            console.log("query", q);
 
             var docId = "";
             const querySnapshot = await getDocs(q);
