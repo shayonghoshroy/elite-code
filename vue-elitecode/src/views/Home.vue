@@ -77,7 +77,6 @@
                 const docRef = doc(this.scheduleCollection, getAuth().currentUser.uid);
                 const docSnap = await getDoc(docRef);
                 
-                console.log(getAuth().currentUser.uid);
                 if (docSnap) {
                     const target_copy = Object.assign({}, docSnap.data());
                     this.schedule = target_copy.schedule;

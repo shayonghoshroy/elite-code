@@ -109,6 +109,7 @@ export default {
             // run user code, return any errors
             // by creating a new function instead of using eval(), all variables are locally scoped and its safer
             try { 
+                // args format: a, b
                 var F = new Function (this.problem.args, this.script);
                 // loop thru all testcases in problem
                 for (const [key, value] of Object.entries(this.problem.testcases)) {
@@ -253,6 +254,6 @@ export default {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
-        
+
     }
 </style>
